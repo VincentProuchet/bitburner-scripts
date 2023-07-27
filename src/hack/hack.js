@@ -16,12 +16,13 @@
 export async function main(ns) {
     const args = ns.flags([['help', false]]);
     const hostname = args._[0];// permet de récupérer les argument passés à la commande de lancement du script
+    var hackit = true;
     if (args.help && !hostname) {
         // make a help description using 
         // ns.tprint('comment ${hostname}');
     }
     do {
         await ns.hack(hostname);
-    } while (true);
+    } while (hackit);
 
 }

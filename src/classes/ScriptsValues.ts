@@ -1,40 +1,41 @@
-"use strict";
+import { NS } from "../../NetscriptDefinitions";
+
 /**
  * contient les valeurs liées aux scripts
  * 
  */
 export default class ScriptValues {
     /**@Type{NS}*/
-    ns;
+    static ns: NS;
     /**@type{String} */
-    script_host
+    script_host: string;
     /**@type{String} */
-    script_directory = "./scripts/";
+    static script_directory = "./scripts/";
     /**@type{String} */
-    class_directory = "./scripts/classes/";
+    static class_directory = "./scripts/classes/";
     /**@type{String} */
-    hack_directory = "./scripts/hack/";
+    static hack_directory = "./scripts/hack/";
     /**@type{String} */
-    hack_script_name = "hack.js";
+    static hack_script_name = "hack.js";
     /**@type{String} */
-    weaken_script_name = "weaken.js";
+    static weaken_script_name = "weaken.js";
     /**@type{String} */
-    grow_script_name = "grow.js";
+    static grow_script_name = "grow.js";
 
     /** collections des noms de scripts */
     scripts = [
-        this.hack_script_name
-        ,this.weaken_script_name
-        ,this.grow_script_name
+        ScriptValues.hack_script_name
+        , ScriptValues.weaken_script_name
+        , ScriptValues.grow_script_name
     ];
 
     /** 
-     * @param{NS} ns
      */
-    constructor(ns, hostname = "home") {
-        this.ns = ns;
-        this.hostname = hostname;
+    constructor(ns: NS, hostname = "home") {
+        ScriptValues.ns = ns;
+        this.script_host = hostname;
     }
+
 
     /**
      * teste l'existence des scripts 
@@ -43,11 +44,11 @@ export default class ScriptValues {
      */
     testScriptsExistance() {
         // on déclare la valeur de retour à vraie
-        var test = true;
+        let test = true;
         this.scripts.forEach(
             (value) => {
                 // il suffit qu'un seul fichier n'existe pas 
-                if (!this.ns.fileExists(this.script_directory + value)) {
+                if (!ScriptValues.ns.fileExists(ScriptValues.script_directory + value)) {
                     // pour que la valeur de retour devienne fausse
                     test = false;
                 }
