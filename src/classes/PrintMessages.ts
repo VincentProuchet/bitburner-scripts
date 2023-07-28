@@ -8,8 +8,11 @@ export default class Print {
         Print.ns = ns;
     }
 
-    error(message: string) {
+    error(message: string): void {
 
+        Print.ns.printf(message);
+    }
+    info(message: string): void {
         Print.ns.printf(message);
     }
 

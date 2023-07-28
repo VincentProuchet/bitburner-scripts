@@ -1,6 +1,8 @@
+/* eslint-disable prefer-const */
 "use strict"
 
-import {ScriptValues} from "./scripts/classes/ScriptsValues.js";
+import ScriptsValues from "classes/ScriptsValues";
+import { NS, Server } from "../../NetscriptDefinitions";
 /**
  * classe contenant les références aux 
  * instances de scripts
@@ -10,117 +12,121 @@ import {ScriptValues} from "./scripts/classes/ScriptsValues.js";
 
  * 
  */
-export class HackTarget {
+export default class HackTarget {
     /**
      * Serveur ciblée
-     * @type{Server}
      */
-    server = null;
+    target: Server;
     /**
      * instance de la classe netscript
-     *  @type {NS}
      */
-    ns = null;
+    ns: NS;
+    /**
+    */
+    SV: ScriptsValues;
     /**
      * collection des scripts de hack pour cette cible
-     * @type {Number[]}
      */
-    hack_scripts = [];
+    hack_scripts: number[] = [];
     /**
      * collection des scripts de weaken pour cette cible
-     * @type {Number[]}
      */
-    weaken_scripts = [];
+    weaken_scripts: number[] = [];
     /**
      * collection des scripts de grow pour cette cible
-     * @type {Number[]}
      */
-    grow_scripts = [];
+    grow_scripts: number[] = [];
     /**
      * consommmation de memoire maximale authorisé a l'instance
      */
     memory_max = 0;
-    /**
-     * @type {ScriptValues}
+    /** 
+    * 
      */
-    SV = new ScriptValues();
+    started_script = 0;
 
     /**
      * @param {NS} ns
      * @param {String} target
      */
-    constructor(ns, target = "") {
-        this.ns = ns
-        this.server = this.ns.getServer(target)
-        
+    constructor(ns: NS, target = "") {
+        this.ns = ns;
+        this.SV = new ScriptsValues(ns, target);
+        this.target = this.ns.getServer(target);
     }
-
-    weakenManagement() {
+    /**
+     * controle les scripts de weaken 
+    * démarre des scripts de weaken 
+    * selon le calcul d'une tendance 
+    * et d'une prioritée    
+     * @returns {void}
+     */
+    weakenManagement(): void {
+        if (this.target.hackDifficulty == undefined || this.target.baseDifficulty == undefined) {
+            return;
+        }
         // weaken management
-        weaken_scripts = check_programs_alive(weaken_scripts);
-        if (weaken_scripts.length == 0) {
+        this.weaken_scripts = this.check_programs_alive(this.weaken_scripts);
+        if (this.weaken_scripts.length == 0) {
             // decision de démarrer un script de weaken        
-            if (target.hackDifficulty > target.baseDifficulty) {
-                started_script_PID = ns2.run( this.SV. script_directory + weaken_script_name, 1, target.hostname);
-                if (started_script_PID > 0) {
+            if (this.target.hackDifficulty > this.target.baseDifficulty) {
+                let started_script = this.ns.run(ScriptsValues.script_directory + ScriptsValues.weaken_script_name, 1, this.target.hostname);
+                if (started_script > 0) {
                     // on garde une référence au script lancé en mémoire
-                    weaken_scripts.push(started_script_PID);
-                    ns2.tprint("started weaken script witn PID : " + started_script_PID);
-                    started_script_PID = 0;
+                    this.weaken_scripts.push(this.started_script);
+
                 }
                 else {
-                    printError(" Couldn't start weaken script ");
+                    // do nothing
                 }
             }
 
         }
     }
-/**
-* 
-*/
-    growManagement() {
+    /**
+     * controle les scripts de grow
+    * démarre des scripts de grow si necessaire
+    * basé sur le calcul d'une tendence et d'une prioritée
+     * @returns {void}
+     */
+    growManagement(): void {
+
         // grow management
-        grow_scripts = check_programs_alive(grow_scripts);
-        if (grow_scripts.length == 0) {
+        this.grow_scripts = this.check_programs_alive(this.grow_scripts);
+        if (this.target.moneyAvailable == undefined || this.target.moneyMax == undefined) {
+            return;
+        }
+        if (this.grow_scripts.length == 0) {
             // décision de démarrer un script de grow
-            if (target.moneyAvailable < target.moneyMax * 0.9) {
-                started_script_PID = ns2.run(script_directory + grow_script_name, 1, target.hostname);
-                if (started_script_PID > 0) {
+            if (this.target.moneyAvailable < this.target.moneyMax * 0.9) {
+                let started_script = this.ns.run(ScriptsValues.script_directory + ScriptsValues.grow_script_name, 1, this.target.hostname);
+                if (started_script > 0) {
                     // on garde une référence au script lancé en mémoire
-                    grow_scripts.push(started_script_PID);
-                    ns2.tprint("started grow script witn PID : " + started_script_PID);
-                    started_script_PID = 0;
+                    this.grow_scripts.push(this.started_script);
+
+
                 }
                 else {
-                    printError(" Couldn't start grow script ");
+                    // nothing
                 }
-                started_script_PID = 0;
+                this.started_script = 0;
 
             }
         }
     }
-/**
-* teste l'existence des script necessaires au fonctionnement 
-* du programme 
-* provoque l'affichage d'une erreur dans le terminal 
-* @returns Boolean
-*/
-    testScriptsExistance() {
-        if (!ns2.fileExists(script_directory + hack_script_name)) {
-            printError(" No hack script.");
-            return false;
-        }
-        if (!ns2.fileExists(script_directory + weaken_script_name)) {
-            printError(" No weaken script.");
-            return false;
-        }
-        if (!ns2.fileExists(script_directory + grow_script_name)) {
-            printError(" No grow script.");
-            return false;
-        }
-        ns2.tprint("INFO " + " All scripts validated ");
-        return true;
-    }
+    /**
+    * controle la liste de nombre 
+    * en tant que program PID
+     * @param {number[]} target tableau de nombres
+     * @returns {number[]} liste ne contenant que les PID de programme en cours d'exécution
+     */
+    check_programs_alive(targets: number[]): number[] {
 
+        return targets.filter(
+            (value) => {
+                return (this.ns.isRunning(value));
+            }
+        );
+    }
 
 }
