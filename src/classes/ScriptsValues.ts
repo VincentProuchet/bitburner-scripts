@@ -5,24 +5,42 @@ import { NS } from "../../NetscriptDefinitions";
  * 
  */
 export default class ScriptValues {
-    /**@Type{NS}*/
+    /** instance de netscript */
     static ns: NS;
-    /**@type{String} */
+    /**
+         hote des scripts de l'instance
+         serveur ou se trouve les scripts
+    */
     script_host: string;
-    /**@type{String} */
+    /**
+        repertoire des scripts
+     */
     static script_directory = "./scripts/";
-    /**@type{String} */
+    /**
+        repertoire des classes
+     */
     static class_directory = "./scripts/classes/";
-    /**@type{String} */
+    /**  
+        repertoire des scripts de hack
+    */
     static hack_directory = "./scripts/hack/";
-    /**@type{String} */
+    /** 
+        nom du fichier de script de hack
+    */
     static hack_script_name = "hack.js";
-    /**@type{String} */
+    /** 
+    nom du fichier du script de weaken
+    */
     static weaken_script_name = "weaken.js";
-    /**@type{String} */
+    /**
+        nom du fichier du script de grow
+     */
     static grow_script_name = "grow.js";
 
-    /** collections des noms de scripts */
+    /** 
+        collections des noms de scripts 
+        utilisée pour l'autotest de l'existance des scripts
+    */
     scripts = [
         ScriptValues.hack_script_name
         , ScriptValues.weaken_script_name

@@ -1,8 +1,17 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { NS } from "../NetscriptDefinitions";
+/**
+ * 
+ * @param {NS} ns 
+ * @returns 
+ */
 export async function main(ns) {
     const flags = ns.flags([
         ['refreshrate', 200],
         ['help', false],
     ])
+    /** ajouté seulement pour retirer l'alerte de boucle infinie de VSCode */
+    var monitor = true;
     if (flags._.length === 0 || flags.help) {
         ns.tprint("This script helps visualize the money and security of a server.");
         ns.tprint(`USAGE: run ${ns.getScriptName()} SERVER_NAME`);
@@ -12,7 +21,7 @@ export async function main(ns) {
     }
     ns.tail();
     ns.disableLog('ALL');
-    while (true) {
+    while (monitor) {
         const server = flags._[0];
         let money = ns.getServerMoneyAvailable(server);
         if (money === 0) money = 1;
@@ -29,7 +38,12 @@ export async function main(ns) {
         await ns.sleep(flags.refreshrate);
     }
 }
-
+/**
+ * autocompletion pour le terminal du jeu
+ * @param {*} data 
+ * @param {*} args 
+ * @returns 
+ */
 export function autocomplete(data, args) {
     return data.servers;
 }

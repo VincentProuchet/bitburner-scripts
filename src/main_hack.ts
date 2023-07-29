@@ -1,5 +1,7 @@
-import { NS } from "../../NetscriptDefinitions";
-import HachTarget from "classes/HackTarget";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import HackTarget from "classes/HackTarget";
+import { NS } from "../NetscriptDefinitions";
+
 
 
 /**
@@ -15,7 +17,7 @@ export async function main(ns: NS): Promise<number> {
         ns.tprint(`> run ${ns.getScriptName()} n00dles`);
         return 0;
     }
-    let targets: [HachTarget];
+    let targets: HackTarget[];
 
     return 0;
 }

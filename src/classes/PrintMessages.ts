@@ -1,7 +1,6 @@
 import { NS } from "../../NetscriptDefinitions";
 
 export default class Print {
-    /**@type{NS} */
     static ns: NS;
 
     static setNS(ns: NS) {

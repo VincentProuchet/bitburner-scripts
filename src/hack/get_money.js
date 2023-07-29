@@ -1,4 +1,6 @@
-"use strict";
+/* eslint-disable no-constant-condition */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { NS } from "../NetscriptDefinitions";
 
 
 /**
@@ -16,13 +18,13 @@ var weaken_script_name = "weaken.js";
 var weaken_script_mem_cost = 0;
 var grow_script_name = "grow.js";
 var grow_script_mem_cost = 0;
-/**@type {Number} */
+/**@type {number} */
 var started_script_PID = 0;
-/**@type {[Number]} */
+/**@type {number[]} */
 var hack_scripts = [];
-/**@type {[Number]} */
+/**@type {[number]} */
 var weaken_scripts = [];
-/**@type {[Number]} */
+/**@type {number[]} */
 var grow_scripts = [];
 
 var ram_used = 0;
@@ -153,10 +155,10 @@ function initScriptsVars() {
 /**
  * check a list of numbers as program PID
  * retrun the list with only still running programs
- * @type {Int16Array} targets
- * @returns {[Number]}
+ * @param {number[]} targets
+ * @returns {number[]}
  */
-function check_programs_alive(targets = [Number]) {
+function check_programs_alive(targets) {
     return targets.filter(
         (value) => {
             if (value == 0 | null | undefined) {

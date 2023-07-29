@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { NS } from "../NetscriptDefinitions";
+
 /** @param {NS} ns **/
 export async function main(ns) {
 	const args = ns.flags([["help", false]]);

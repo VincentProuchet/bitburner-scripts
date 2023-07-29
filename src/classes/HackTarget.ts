@@ -1,5 +1,4 @@
 /* eslint-disable prefer-const */
-"use strict"
 
 import ScriptsValues from "classes/ScriptsValues";
 import { NS, Server } from "../../NetscriptDefinitions";
@@ -22,6 +21,7 @@ export default class HackTarget {
      */
     ns: NS;
     /**
+    instance de ScriptValues 
     */
     SV: ScriptsValues;
     /**
@@ -46,8 +46,8 @@ export default class HackTarget {
     started_script = 0;
 
     /**
-     * @param {NS} ns
-     * @param {String} target
+     * @param {NS} ns instance de netscript 
+     * @param {String} target cible
      */
     constructor(ns: NS, target = "") {
         this.ns = ns;

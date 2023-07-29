@@ -1,23 +1,38 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import { NS } from "../NetscriptDefinitions";
+/**
+ * 
+ * @param {NS} ns 
+ * @param {string} parent 
+ * @param {string} server 
+ * @param {string} target 
+ * @param {string[]} route 
+ * @returns 
+ */
 function recursiveScan(ns, parent, server, target, route) {
     const children = ns.scan(server);
     for (let child of children) {
         if (parent == child) {
             continue;
         }
-        if (child == target) {
+        else if (child == target) {
             route.unshift(child);
             route.unshift(server);
             return true;
         }
-
-        if (recursiveScan(ns, server, child, target, route)) {
+        else if (recursiveScan(ns, server, child, target, route)) {
             route.unshift(server);
             return true;
         }
     }
     return false;
 }
-
+/**
+ * 
+ * @param {NS} ns 
+ * @returns 
+ */
 export async function main(ns) {
     const args = ns.flags([["help", false]]);
     let route = [];
@@ -37,7 +52,12 @@ export async function main(ns) {
         ns.tprint(`${" ".repeat(i)}${extra}${route[i]}`);
     }
 }
-
+/**
+ * 
+ * @param {import("./classes/AutoCompletionValues").AutoCompletionValues} data 
+ * @param {} args 
+ * @returns 
+ */
 export function autocomplete(data, args) {
     return data.servers;
 }
