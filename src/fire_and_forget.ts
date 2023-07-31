@@ -21,73 +21,119 @@ let ram_min = 0;
 // maximum de mémoire authorizé pour l'execution des scripts
 let ram_max = 0;
 
+/** 
+censé être un tir et oublie
+en identifiant le serveur d'execution et la cible
+copier les scripts de hack sur le serveur d'exution si il n'y sont pas 
+les executer en batch 
+1 hack 1 grow 1 weaken pour un serveur non possédé pâr le joueur
+1 hack 2 grow et 3 weaken pour les autres répétés autant de fois que l'autorise le 
+paramètre de mémoire
 
-/**
-copy les scripts de base pour le hack
-hack.js 
-grow.js
-weaken.js
+mais le script plante
 
-et les démarre sur le serveur cible
- @param {NS} ns */
+@param {NS} ns 
+*/
 export async function main(ns: NS) {
     ns2 = ns;
     const args = ns2.flags([
         ['help', false]
+        , ['s', "home"] // server d'ou sont lancés le script
         , ['c', ""] // serveur cible des scripts
-
+        , ['m', 8] // memoir maximale authorizé pour le lancement des scripts
+        , ['tail', false]
     ]);
+    if (args.tail) {
+        ns.tail();
+    }
+    // premier paramètre est la cible
+    try {
+        ram_max = Number.parseInt(args.m.toString());
+    }
+    catch (err) {
+        ns.tprint("la memoire doit être un nombre");
+        return 1;
+    }
+    if (ram_max % 4 != 0) {
+        ns.tprint("la mémoire doit être un multiple de 8 \n elle est exprimée en GB");
+        return 1;
+    }
+    ns.tprint('ram set');
+
+    target_name = args.c.toString();
     if (args.help || !args.c) {
         ns.tprint('tu a oublié la cible ');
         ns.tprint("du coup je t'affiche cette aide ;)");
         return 0;
     }
-    target_name = args.c.toString();
     if (target_name == "home") {
         ns.tprint(` On va dire qu'on a rien vu `);
         ns.tprint(` que tu n'as pas tenté de copier les script de hack de base sur home `);
-        ns.print("pire ce script aurait attaqué home ");
         return 1;
     }
-    target = ns.getServer(target_name);
-
-    if (target.purchasedByPlayer) {
-        ns.tprint(`${target.hostname} est un serveur appartenant au jouueur`);
-        return 1;
-    }
+    server = ns.getServer(args.s.toString());
+    ns.tprint('server ok');
     // test de l'exitence des script sur home
     if (!testScriptsExistance("home")) {
-        ns.tprint(`scripts de base non trouvé sur home `)
+        ns.tprint("pas les scripts sur home");
         return 1;
     }
+
+    // controle de l'esxigence mémoire
+    if (server.maxRam < ram_min) {
+        printError(`you need ${ram_min} to runs necessary scripts server has ${server.maxRam}`);
+        return 1;
+    }
+    if (target_name == "") {
+        target_name = ns2.getHostname();
+    }
+    if (target_name == "home") {
+        printError(" you can't attack home");
+        return 1;
+    }
+    target = ns2.getServer(target_name);
+    ns.tprint('target ok')
+
+
     if (!target.hasAdminRights) {
         printError(" no admin right on target server ");
         return 1;
     }
-    if (!testScriptsExistance(target.hostname)) {
+    if (!server.hasAdminRights) {
+        printError(" no admin right on execution server ");
+        return 1;
+    }
+    if (!testScriptsExistance(server.hostname) || server.hostname != "home") {
 
-        if (ns2.scp(script_directory + hack_script_name, target.hostname, "home")) {
+        ns.tprint(`un des scripts est manquant sur le serveur :${server.hostname}`)
+        if (ns2.scp(`${script_directory}${hack_script_name}`, server.hostname, "home")) {
             printInfo(hack_script_name + " successfuly copied on target ");
         }
-        if (ns2.scp(script_directory + weaken_script_name, target.hostname, "home")) {
+        if (ns2.scp(`${script_directory}${weaken_script_name}`, server.hostname, "home")) {
             printInfo(weaken_script_name + " successfuly copied on target ");
         }
-        if (ns2.scp(script_directory + grow_script_name, target.hostname, "home")) {
+        if (ns2.scp(`${script_directory}${grow_script_name}`, server.hostname, "home")) {
             printInfo(grow_script_name + " successfuly copied on target ");
         }
     }
     // initialisation des besoin en mémoire
+    hack_script_mem_cost = ns.getScriptRam(`${script_directory}${hack_script_name}`, server.hostname);
+    grow_script_mem_cost = ns.getScriptRam(`${script_directory}${grow_script_name}`, server.hostname);
+    weaken_script_mem_cost = ns.getScriptRam(`${script_directory}${weaken_script_name}`, server.hostname);
+    ram_min = hack_script_mem_cost + grow_script_mem_cost + weaken_script_mem_cost;
+    ns.tprint(` empreinte memoire ${ram_min} Gb`);
 
-    // hack_script_mem_cost = ns.getScriptRam(`${script_directory}${hack_script_name}`, target.hostname);
-    // grow_script_mem_cost = ns.getScriptRam(`${script_directory}${grow_script_name}`, target.hostname);
-    // weaken_script_mem_cost = ns.getScriptRam(`${script_directory}${weaken_script_name}`, target.hostname);
-    // ram_min = hack_script_mem_cost + grow_script_mem_cost + weaken_script_mem_cost;
 
+    if (server.purchasedByPlayer) {
+        ns.tprint(`serveur possédé par le joueur`);
+        startSciptsOnPlayerServer();
+    }
     else {
+        ns.tprint(`serveur non possédé par le joueur`);
         startSciptsOntarget();
     }
-    return 0;
 
+    return 0;
 
 }
 
@@ -124,9 +170,9 @@ function testScriptsExistance(target: string) {
 destiné à l'usage sur un serveur cible
  */
 function startSciptsOntarget() {
-    ns2.exec(`${script_directory}${hack_script_name}`, target.hostname, 1, "-c", target.hostname);
-    ns2.exec(`${script_directory}${weaken_script_name}`, target.hostname, 1, "-c", target.hostname);
-    ns2.exec(`${script_directory}${grow_script_name}`, target.hostname, 1, "-c", target.hostname);
+    ns2.exec(`${script_directory}${hack_script_name}`, server.hostname, 1, "-c", target.hostname);
+    ns2.exec(`${script_directory}${weaken_script_name}`, server.hostname, 1, "-c", target.hostname);
+    ns2.exec(`${script_directory}${grow_script_name}`, server.hostname, 1, "-c", target.hostname);
 }
 /**
  * démarre les scripts 
