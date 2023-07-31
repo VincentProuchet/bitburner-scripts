@@ -6,9 +6,8 @@ import { NS } from "../NetscriptDefinitions";
 /**
  * @type {NS}
  */
-var ns2 = null;
-/** temps d'arret du script entre deux boucles */
-var sleepTime = 5000;
+var ns2;
+
 
 var script_directory = "/scripts/hack/";
 
@@ -100,10 +99,10 @@ export async function main(ns) {
         // refresh des données de la cible
         target = await ns2.getServer(target.hostname);
 
-        await weakenManagement();
-        await growManagement();
+        weakenManagement();
+        growManagement();
 
-        await ns2.sleep(sleepTime);
+
 
     } while (true);
 
@@ -181,7 +180,7 @@ function weakenManagement() {
             if (started_script_PID > 0) {
                 // on garde une référence au script lancé en mémoire
                 weaken_scripts.push(started_script_PID);
-                ns2.tprint("started weaken script witn PID : " + started_script_PID);
+                ns2.print("started weaken script witn PID : " + started_script_PID);
                 started_script_PID = 0;
             }
             else {
@@ -204,11 +203,8 @@ function growManagement() {
             if (started_script_PID > 0) {
                 // on garde une référence au script lancé en mémoire
                 grow_scripts.push(started_script_PID);
-                ns2.tprint("started grow script witn PID : " + started_script_PID);
+                ns2.print("started grow script witn PID : " + started_script_PID);
                 started_script_PID = 0;
-            }
-            else {
-                printError(" Couldn't start grow script ");
             }
             started_script_PID = 0;
 

@@ -1,4 +1,6 @@
+/* eslint-disable no-constant-condition */
 import { NS } from "../../NetscriptDefinitions";
+import AutoCompletionValues from "../interface/AutoCompletionValues";
 
 /**
  * ce script lance des hack continue sur la machine cible
@@ -18,11 +20,11 @@ import { NS } from "../../NetscriptDefinitions";
 export async function main(ns: NS) {
     const args = ns.flags([
         ['help', false]
-        , ['hostname', false]
+        , ['c', "home"]
     ]);
-    const hostname = args.hostname.toString();// permet de récupérer les argument passés à la commande de lancement du script
-    let hackit = true;
-    if (args.help || !args.hostname) {
+    const hostname = args.c.toString();
+
+    if (args.help || !args.c) {
         ns.tprint(' ce script effectue la commande hack en boucle ');
         ns.tprint(' sur le serveur dont le hostname est passé en argument ');
         return 0;
@@ -34,7 +36,10 @@ export async function main(ns: NS) {
 
     do {
         await ns.hack(hostname);
-    } while (hackit);
-    hackit = false;
-    return 0;
+    } while (true);
+
+}
+/**@argument {AutoCompletionValues} data */
+export function autocomplete(data: AutoCompletionValues, args: any) {
+    return ["help", "c", ...data.servers];
 }

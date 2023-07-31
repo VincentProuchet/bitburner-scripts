@@ -1,14 +1,14 @@
 /* eslint-disable prefer-const */
 
-import ScriptsValues from "classes/ScriptsValues";
+import ScriptsValues from "/classes/ScriptsFileManager";
 import { NS, Server } from "../../NetscriptDefinitions";
+import HackScript from "../interface/HackScript";
+import ScriptsFileManager from "/classes/ScriptsFileManager";
 /**
  * classe contenant les références aux 
  * instances de scripts
  * ciblant un serveur précis
  * l'objet s'autoconfigure avec les valeurs du serveur a attaquer
-
-
  * 
  */
 export default class HackTarget {
@@ -23,27 +23,24 @@ export default class HackTarget {
     /**
     instance de ScriptValues 
     */
-    SV: ScriptsValues;
+    SV: ScriptsFileManager
     /**
      * collection des scripts de hack pour cette cible
      */
-    hack_scripts: number[] = [];
+    hack_scripts: HackScript[] = [];
     /**
      * collection des scripts de weaken pour cette cible
      */
-    weaken_scripts: number[] = [];
+    weaken_scripts: HackScript[] = [];
     /**
      * collection des scripts de grow pour cette cible
      */
-    grow_scripts: number[] = [];
+    grow_scripts: HackScript[] = [];
     /**
      * consommmation de memoire maximale authorisé a l'instance
      */
     memory_max = 0;
-    /** 
-    * 
-     */
-    started_script = 0;
+
 
     /**
      * @param {NS} ns instance de netscript 
@@ -70,10 +67,17 @@ export default class HackTarget {
         if (this.weaken_scripts.length == 0) {
             // decision de démarrer un script de weaken        
             if (this.target.hackDifficulty > this.target.baseDifficulty) {
-                let started_script = this.ns.run(ScriptsValues.script_directory + ScriptsValues.weaken_script_name, 1, this.target.hostname);
+                let started_script = this.ns.run(ScriptsValues.script_directory
+                    + ScriptsValues.weaken_script_name, 1, this.target.hostname, this.target.hostname);
+
                 if (started_script > 0) {
                     // on garde une référence au script lancé en mémoire
-                    this.weaken_scripts.push(this.started_script);
+                    this.weaken_scripts.push(
+                        {
+                            pid: started_script
+                            , source: this.target.hostname
+                        }
+                    );
 
                 }
                 else {
@@ -99,32 +103,54 @@ export default class HackTarget {
         if (this.grow_scripts.length == 0) {
             // décision de démarrer un script de grow
             if (this.target.moneyAvailable < this.target.moneyMax * 0.9) {
-                let started_script = this.ns.run(ScriptsValues.script_directory + ScriptsValues.grow_script_name, 1, this.target.hostname);
+                let started_script = this.ns.run(ScriptsValues.script_directory
+                    + ScriptsValues.grow_script_name, 1, this.target.hostname, this.target.hostname);
+
                 if (started_script > 0) {
                     // on garde une référence au script lancé en mémoire
-                    this.grow_scripts.push(this.started_script);
-
-
+                    this.grow_scripts.push(
+                        {
+                            pid: started_script
+                            , source: this.target.hostname
+                        });
                 }
-                else {
-                    // nothing
-                }
-                this.started_script = 0;
-
             }
+
+
         }
     }
+
+    /**
+    * controle les scripts de hack
+    * démarre des scripts si necessaire
+    * basé sur le calcul d'une tendence et d'une prioritée
+    * @returns {void}
+    */
+    hackManagement(): void {
+        let started_script = this.ns.run(ScriptsValues.script_directory
+            + ScriptsValues.hack_script_name, 1, this.target.hostname, this.target.hostname);
+
+        if (started_script > 0) {
+            // on garde une référence au script lancé en mémoire
+            this.hack_scripts.push(
+                {
+                    pid: started_script
+                    , source: this.target.hostname
+                });
+        }
+    }
+
     /**
     * controle la liste de nombre 
     * en tant que program PID
-     * @param {number[]} target tableau de nombres
-     * @returns {number[]} liste ne contenant que les PID de programme en cours d'exécution
+     * @param {HackScript[]} target tableau de nombres
+     * @returns {HackScript[]} seulement les  programmes en cours d'exécution
      */
-    check_programs_alive(targets: number[]): number[] {
+    check_programs_alive(targets: HackScript[]): HackScript[] {
 
         return targets.filter(
             (value) => {
-                return (this.ns.isRunning(value));
+                return (this.ns.isRunning(value.pid, value.source));
             }
         );
     }

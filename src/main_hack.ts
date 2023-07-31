@@ -1,11 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import HackTarget from "classes/HackTarget";
+
 import { NS } from "../NetscriptDefinitions";
+import HackScript from "./interface/HackScript";
+import HackTarget from "./classes/HackTarget";
 
 
 
 /**
- * 
+ * ce script est censé tout automatiser
+ de la recherche de serveur attaquable
+ l'ouverture des ports
+ l'installation de la backdoor
+ la copy des script hack() weaken() grow()
+sur les serveur ouverts
+le démarrage de ces scripts en leur faisant attaquer une cible
+qui peut tout à fait être un autre serveur 
+en fonction de la mémoire disponible
+
  *  @param {NS} ns 
 */
 export async function main(ns: NS): Promise<number> {

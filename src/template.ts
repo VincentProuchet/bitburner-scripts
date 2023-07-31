@@ -1,7 +1,9 @@
 import { NS } from "@ns";
-import AutoCompletionValues from "./classes/AutoCompletionValues";
+import AutoCompletionValues from "./interface/AutoCompletionValues";
 
 export async function main(ns: NS): Promise<void> {
+  const args = ns.flags([]);
+  ns.tprint(args);
   ns.tprint("Hello Remote API!");
 }
 /**
@@ -12,7 +14,7 @@ export async function main(ns: NS): Promise<void> {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function autocomplete(data: AutoCompletionValues, args: string[]): string[] {
-  return [...data.servers]; // This script autocompletes the list of servers.
+  return ["help", ...data.servers]; // This script autocompletes the list of servers.
   return [...data.servers, ...data.scripts]; // Autocomplete servers and scripts
   return ["low", "medium", "high"]; // Autocomplete 3 specific strings.
 

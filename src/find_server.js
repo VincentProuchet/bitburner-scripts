@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-import { NS } from "../NetscriptDefinitions";
 /**
  * 
  * @param {NS} ns 
@@ -54,7 +51,7 @@ export async function main(ns) {
 }
 /**
  * 
- * @param {import("./classes/AutoCompletionValues").AutoCompletionValues} data 
+ * @param {import("./interface/AutoCompletionValues").AutoCompletionValues} data 
  * @param {} args 
  * @returns 
  */
