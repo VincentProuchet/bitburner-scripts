@@ -56,7 +56,8 @@ export async function main(ns: NS) {
         return 1;
     }
     // test de l'exitence des script sur home
-    if (!testScriptsExistance("home")) {
+    if (!testScriptsExistance("home", hack_script_name,
+        weaken_script_name, grow_script_name)) {
         ns.tprint(`scripts de base non trouvé sur home `)
         return 1;
     }
@@ -64,8 +65,8 @@ export async function main(ns: NS) {
         printError(" no admin right on target server ");
         return 1;
     }
-    if (!testScriptsExistance(target.hostname)) {
-
+    if (!testScriptsExistance(target.hostname, hack_script_name,
+        weaken_script_name, grow_script_name)) {
         if (ns2.scp(script_directory + hack_script_name, target.hostname, "home")) {
             printInfo(hack_script_name + " successfuly copied on target ");
         }
@@ -83,73 +84,39 @@ export async function main(ns: NS) {
     // weaken_script_mem_cost = ns.getScriptRam(`${script_directory}${weaken_script_name}`, target.hostname);
     // ram_min = hack_script_mem_cost + grow_script_mem_cost + weaken_script_mem_cost;
 
-    else {
-        startSciptsOntarget();
-    }
+
+    startSciptsOntarget();
+
     return 0;
 
 
 }
-
-
-
-
-
-
 /**
  * teste l'existence des script necessaires au fonctionnement 
  * du programme 
- * provoque l'affichage d'une erreur dans le terminal 
+ * provoque l'affichage d'erreur dans le terminal 
  * @returns Boolean
  */
-function testScriptsExistance(target: string) {
-
-    if (!ns2.fileExists(script_directory + hack_script_name, target)) {
-        printError(`no script ${hack_script_name} on ${target}`);
-        return false;
+function testScriptsExistance(target: string, ...scripts: string[]): boolean {
+    let response = true;
+    for (let s of scripts) {
+        if (!ns2.fileExists(`${script_directory}${s}`, target)) {
+            printError(`no script ${s} on ${target}`);
+            response = false;
+        }
     }
-    if (!ns2.fileExists(script_directory + weaken_script_name, target)) {
-        printError(`no script ${weaken_script_name} on ${target}`);
-        return false;
-    }
-    if (!ns2.fileExists(script_directory + grow_script_name, target)) {
-        printError(`no script ${grow_script_name} on ${target}`);
-        return false;
-    }
-    ns2.tprint("INFO " + " All scripts validated ");
-    return true;
+    return response;
 }
 /**
  * démarre les scripts 
 destiné à l'usage sur un serveur cible
  */
-function startSciptsOntarget() {
+function startSciptsOntarget(): void {
     ns2.exec(`${script_directory}${hack_script_name}`, target.hostname, 1, "-c", target.hostname);
     ns2.exec(`${script_directory}${weaken_script_name}`, target.hostname, 1, "-c", target.hostname);
     ns2.exec(`${script_directory}${grow_script_name}`, target.hostname, 1, "-c", target.hostname);
 }
-/**
- * démarre les scripts 
-destiné à l'usage sur un serveur possédé par le joueur
- */
-function startSciptsOnPlayerServer() {
-    do {
 
-        ns2.exec(`${script_directory}${hack_script_name}`, server.hostname, 1, "-c", target.hostname);
-        ns2.exec(`${script_directory}${grow_script_name}`, server.hostname, 1, "-c", target.hostname);
-        ns2.exec(`${script_directory}${weaken_script_name}`, server.hostname, 1, "-c", target.hostname);
-        server = ns2.getServer(server.hostname);
-
-        if ((server.maxRam - server.ramUsed) % ram_min) {
-
-            ns2.exec(`${script_directory}${weaken_script_name}`, server.hostname, 1, "-c", target.hostname);
-            ns2.exec(`${script_directory}${grow_script_name}`, server.hostname, 1, "-c", target.hostname);
-            ns2.exec(`${script_directory}${weaken_script_name}`, server.hostname, 1, "-c", target.hostname);
-        }
-        server = ns2.getServer(server.hostname);
-    }
-    while ((server.maxRam - server.ramUsed) % ram_min);
-}
 
 
 /**
@@ -157,10 +124,10 @@ function startSciptsOnPlayerServer() {
  * @param {NS} ns 
  * @param {String} message
  */
-function printError(message: string) {
+function printError(message: string): void {
     ns2.tprint("ERROR " + message);
 }
-function printInfo(message: string) {
+function printInfo(message: string): void {
     ns2.tprint("INFO " + message);
 }
 export function autocomplete(data: AutocompleteData, args: any) {
