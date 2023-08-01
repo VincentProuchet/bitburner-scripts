@@ -14,7 +14,13 @@ export default class ServerManager {
     static server: ServerInfo[] = [];
     static messenger: Message;
     static ns: NS
-
+    /**
+     * 
+    cherche trouve et stoke une référence de chaque serveur connecté au réseau 
+    
+     * @param parent 
+     * @param server 
+     */
     private recursiveScan(parent: string, server: string): void {
         const childs = ServerManager.ns.scan(server);
         for (const child of childs) {
