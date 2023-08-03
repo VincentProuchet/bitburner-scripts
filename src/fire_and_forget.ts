@@ -80,7 +80,7 @@ export async function main(ns: NS) {
     // ou si le server demandé n'est pas home
     if (!testScriptsExistance(server.hostname
         , hack_script_name, weaken_script_name, grow_script_name
-    ) || server.hostname != "home") {
+    ) && server.hostname != "home") {
 
         ns.tprint(`un des scripts est manquant sur le serveur :${server.hostname}`)
         await ns.sleep(500);
@@ -111,7 +111,7 @@ export async function main(ns: NS) {
     else {
         ns.tprint(`serveur non possédé par le joueur`);
         await ns.sleep(500);
-        startSciptsOntarget();
+        await startSciptsOnPlayerServer();
     }
 
     return 0;
@@ -180,9 +180,12 @@ async function startSciptsOnPlayerServer() {
         ns2.exec(`${script_directory}${weaken_script_name}`, server.hostname, 1, "-c", target.hostname);
         ns2.exec(`${script_directory}${grow_script_name}`, server.hostname, 1, "-c", target.hostname);
 
-        await ns2.sleep(1000);
+        await ns2.sleep(25);
         server = ns2.getServer(server.hostname);
-        ns2.tprint(`memoir restante ${free_ram = server.maxRam - server.ramUsed}`);
+        free_ram = server.maxRam - server.ramUsed
+        if (server.hostname == "home") {
+            ns2.tprint(`memoire restante ${free_ram}`);
+        }
 
     }
     while ((free_ram) > ram_min);
